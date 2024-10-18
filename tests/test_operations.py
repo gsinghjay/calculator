@@ -1,5 +1,5 @@
 """ tests/test_operations.py """
-import pytest
+import pytest # type: ignore
 from app.operations import addition, subtraction, multiplication, division
 
 

@@ -1,4 +1,4 @@
-import pytest
+import pytest # type: ignore
 from app.logging import setup_logging
 
 def test_setup_logging():
