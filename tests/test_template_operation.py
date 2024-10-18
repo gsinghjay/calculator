@@ -1,4 +1,4 @@
-import pytest
+import pytest # type: ignore
 import logging
 from app.template_operation import Addition, Subtraction, Multiplication, Division
 
