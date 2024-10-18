@@ -3,4 +3,3 @@ branch = True
 source = app
 omit =
     main.py
-    app/logging/__init__.py
