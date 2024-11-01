@@ -2,9 +2,13 @@
 
 ![Python Versions](https://img.shields.io/badge/python-3.8%2C%203.9%2C%203.10-blue)
 ![Build Status](https://github.com/gsinghjay/calculator/actions/workflows/tests.yml/badge.svg)
-![License](https://img.shields.io/github/license/gsinghjay/calculator)
-![Coverage Status](https://img.shields.io/coveralls/github/gsinghjay/calculator)
-![GitHub Last Commit](https://img.shields.io/github/last-commit/gsinghjay/calculator)
+<!--
+The following badges require repository access. To enable them for a private repository, consider using authenticated Shields.io badges.
+
+![License](https://img.shields.io/github/license/gsinghjay/calculator?token=YOUR_SHIELDS_TOKEN)
+![Coverage Status](https://img.shields.io/coveralls/github/gsinghjay/calculator?token=YOUR_SHIELDS_TOKEN)
+![GitHub Last Commit](https://img.shields.io/github/last-commit/gsinghjay/calculator?token=YOUR_SHIELDS_TOKEN)
+-->
 
 ## Table of Contents
 
