@@ -24,6 +24,7 @@ from app.observer import HistoryObserver, CalculatorWithObserver
 from app.template_operation import TemplateOperation, Addition, Subtraction, Multiplication, Division
 
 setup_logging()
+logging.debug("Logging has been set up.")
 
 # ==============================================================================
 # FACTORY PATTERN FOR CREATING OPERATIONS
@@ -48,6 +49,7 @@ class OperationFactory:
         Parameters:
         - operation (str): The operation name (e.g., 'add', 'subtract').
         """
+        logging.debug(f"Creating operation for: {operation}")
         # Dictionary mapping operation names to their corresponding class instances.
         operations_map = {
             "add": Addition(),
@@ -56,9 +58,12 @@ class OperationFactory:
             "divide": Division(),
         }
         # Log the operation creation request at DEBUG level.
-        logging.debug(f"Creating operation for: {operation}")
-        # Retrieve the operation instance from the map.
-        return operations_map.get(operation.lower())  # Returns None if the key is not found.
+        result = operations_map.get(operation.lower())  # Returns None if the key is not found.
+        if result:
+            logging.debug(f"Operation '{operation}' created successfully.")
+        else:
+            logging.debug(f"Operation '{operation}' not found in operations_map.")
+        return result
 
 # Why use the Factory Pattern?
 # - It provides a way to create objects without specifying the exact class.
@@ -86,10 +91,13 @@ class SingletonCalculator:
         Overrides the __new__ method to control the creation of a new instance.
         Ensures that only one instance is created.
         """
+        logging.debug("SingletonCalculator.__new__ called.")
         if cls._instance is None:
             cls._instance = super(SingletonCalculator, cls).__new__(cls)  # Call the superclass __new__ method.
             cls._history = []  # Initialize the shared history.
-            logging.info("SingletonCalculator instance created.")  # Log the creation.
+            logging.info("SingletonCalculator instance created.")
+        else:
+            logging.debug("SingletonCalculator instance already exists.")
         return cls._instance  # Return the singleton instance.
 
     def perform_operation(self, operation: TemplateOperation, a: float, b: float) -> float:
@@ -102,18 +110,38 @@ class SingletonCalculator:
         Returns:
         - The result of the operation.
         """
+        logging.debug("SingletonCalculator.perform_operation called.")
         calculation = Calculation(operation, a, b)  # Create a new Calculation object.
+        logging.debug(f"Calculation created: {calculation}")
         self._history.append(calculation)  # Add the calculation to the shared history.
-        logging.debug(f"SingletonCalculator: Performed operation -> {calculation}")  # Log the operation.
-        return operation.calculate(a, b)  # Execute the calculation and return the result.
+        logging.debug(f"Calculation appended to history: {calculation}")
+        self.notify_observers(calculation)  # Notify observers of the new calculation.
+        logging.debug(f"Operation performed: {calculation}")
+        return calculation  # Return the calculation result.
 
     def get_history(self):
         """
         Returns the history of calculations.
         Includes a breakpoint for debugging using pdb.
         """
-       # pdb.set_trace()  # Pause execution here for debugging.
+        logging.debug("SingletonCalculator.get_history called.")
+        # pdb.set_trace()  # Pause execution here for debugging.
         return self._history  # Return the shared history list.
+
+    def notify_observers(self, calculation):
+        """
+        Notifies all observers about a new calculation.
+        Parameters:
+        - calculation (Calculation): The calculation to notify observers about.
+        """
+        logging.debug(f"Notifying observers about new calculation: {calculation}")
+        # Assuming CalculatorWithObserver has a notify_observers method
+        # Modify accordingly if different
+        # For example:
+        # for observer in self._observers:
+        #     observer.update(calculation)
+        #     logging.debug(f"Notified observer: {observer}")
+        pass  # Replace with actual notification logic as needed.
 
 # Why use the Singleton Pattern?
 # - To control access to a shared resource.
@@ -151,6 +179,7 @@ class Calculation:
         """
         User-friendly string representation of the calculation and result.
         """
+        logging.debug(f"String representation called for Calculation: {self}")
         result = self.operation.calculate(self.operand1, self.operand2)  # Perform the calculation.
         return f"{self.operand1} {self.operation.__class__.__name__.lower()} {self.operand2} = {result}"
 
@@ -174,27 +203,33 @@ def calculator():
     Interactive REPL (Read-Eval-Print Loop) for performing calculator operations.
     Provides a command-line interface for users to interact with the calculator.
     """
-    import pdb  # Import pdb module for debugging.
+    logging.debug("Calculator REPL started.")
 
     # Create an instance of the calculator with observer support.
     calc = CalculatorWithObserver()
+    logging.debug("CalculatorWithObserver instance created.")
 
     # Create an observer to monitor calculation history.
     observer = HistoryObserver()
+    logging.debug("HistoryObserver instance created.")
 
     # Add the observer to the calculator's list of observers.
     calc.add_observer(observer)
+    logging.debug("HistoryObserver added to CalculatorWithObserver.")
 
     # Display a welcome message and instructions.
     print("Welcome to the OOP Calculator! Type 'help' for available commands.")
+    logging.info("Displayed welcome message to user.")
 
     # Start the REPL loop.
     while True:
         # Prompt the user for input.
         user_input = input("Enter an operation and two numbers, or a command: ")
+        logging.debug(f"User input: '{user_input}'")
 
         # Handle the 'help' command.
         if user_input.lower() == "help":
+            logging.debug("User requested help.")
             print("\nAvailable commands:")
             print("  add <num1> <num2>       : Add two numbers.")
             print("  subtract <num1> <num2>  : Subtract the second number from the first.")
@@ -203,26 +238,32 @@ def calculator():
             print("  list                    : Show the calculation history.")
             print("  clear                   : Clear the calculation history.")
             print("  exit                    : Exit the calculator.\n")
+            logging.debug("Displayed help information to user.")
             continue  # Return to the start of the loop.
 
         # Handle the 'exit' command.
         if user_input.lower() == "exit":
             print("Exiting calculator...")
+            logging.info("User initiated exit.")
             break  # Exit the loop and end the program.
 
         # Handle the 'list' command to display calculation history.
         if user_input.lower() == "list":
+            logging.debug("User requested calculation history.")
             if not calc._history:
                 print("No calculations in history.")
+                logging.info("Calculation history is empty.")
             else:
                 for calc_item in calc._history:
                     print(calc_item)  # Calls __str__ method of Calculation.
+                logging.info("Displayed calculation history.")
             continue  # Return to the start of the loop.
 
         # Handle the 'clear' command to clear the history.
         if user_input.lower() == "clear":
+            logging.debug("User requested to clear calculation history.")
             calc._history.clear()  # Clear the history list.
-            logging.info("History cleared.")  # Log the action.
+            logging.info("History cleared.")
             print("History cleared.")
             continue  # Return to the start of the loop.
 
@@ -230,29 +271,37 @@ def calculator():
         try:
             # Set a breakpoint for debugging.
             # pdb.set_trace()  # Execution will pause here, allowing inspection of variables.
-
+            logging.debug("Attempting to parse user input.")
+            
             # Split the user input into components.
             operation_str, num1_str, num2_str = user_input.split()  # May raise ValueError.
+            logging.debug(f"Parsed input - Operation: '{operation_str}', Num1: {num1_str}, Num2: {num2_str}")
 
             # Convert the operand strings to float.
             num1, num2 = float(num1_str), float(num2_str)  # May raise ValueError.
+            logging.debug(f"Converted operands to floats: num1={num1}, num2={num2}")
 
             # Use the factory to create the appropriate operation object.
             operation = OperationFactory.create_operation(operation_str)
+            logging.debug(f"Operation instance: {operation}")
 
             if operation:
                 # Perform the operation using the calculator.
                 result = calc.perform_operation(operation, num1, num2)
                 # Display the result to the user.
                 print(f"Result: {result}")
+                logging.info(f"Displayed result to user: {result}")
             else:
                 # Handle unknown operation names.
                 print(f"Unknown operation '{operation_str}'. Type 'help' for available commands.")
+                logging.warning(f"Unknown operation entered: '{operation_str}'")
 
         except ValueError as e:
             # Handle errors such as incorrect input format or invalid numbers.
-            logging.error(f"Invalid input or error: {e}")  # Log the error.
+            logging.error(f"Invalid input or error: {e}")
             print("Invalid input. Please enter a valid operation and two numbers. Type 'help' for instructions.")
+    
+    logging.debug("Calculator REPL terminated.")
 
 # Why use a REPL?
 # - Provides an interactive way for users to execute commands and see immediate results.

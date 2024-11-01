@@ -11,9 +11,11 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+logging.debug("Calculator logging configured.")
 
 # Registry to hold operation name to class mappings
 operation_registry: Dict[str, Type[TemplateOperation]] = {}
+logging.debug("Initialized operation_registry.")
 
 def register_operation(name: str):
     """
@@ -22,7 +24,9 @@ def register_operation(name: str):
     Parameters:
     - name (str): The name of the operation (e.g., 'add', 'subtract').
     """
+    logging.debug(f"Decorator register_operation called with name='{name}'.")
     def decorator(cls: Type[TemplateOperation]):
+        logging.debug(f"Attempting to register operation '{name}' with class '{cls.__name__}'.")
         if name in operation_registry:
             warnings.warn(f"Operation '{name}' is already registered. Overwriting.")
             logging.warning(f"Operation '{name}' is already registered. Overwriting.")
@@ -37,6 +41,7 @@ class Addition(TemplateOperation):
 
     def execute(self, a: float, b: float) -> float:
         """Return the sum of two numbers."""
+        logging.debug(f"Executing Addition: {a} + {b}")
         return a + b
 
 @register_operation('subtract')
@@ -45,6 +50,7 @@ class Subtraction(TemplateOperation):
 
     def execute(self, a: float, b: float) -> float:
         """Return the difference between two numbers."""
+        logging.debug(f"Executing Subtraction: {a} - {b}")
         return a - b
 
 @register_operation('multiply')
@@ -53,6 +59,7 @@ class Multiplication(TemplateOperation):
 
     def execute(self, a: float, b: float) -> float:
         """Return the product of two numbers."""
+        logging.debug(f"Executing Multiplication: {a} * {b}")
         return a * b
 
 @register_operation('divide')
@@ -61,6 +68,7 @@ class Division(TemplateOperation):
 
     def execute(self, a: float, b: float) -> float:
         """Return the quotient of two numbers. Raise an error if dividing by zero."""
+        logging.debug(f"Executing Division: {a} / {b}")
         if b == 0:
             logging.error("Attempted to divide by zero.")
             raise ValueError("Division by zero is not allowed.")
@@ -68,10 +76,12 @@ class Division(TemplateOperation):
 
 def calculator():
     """Interactive REPL calculator using registry-based operation lookup."""
+    logging.debug("Starting calculator REPL.")
     print("Welcome to the calculator REPL! Type 'exit' to quit, or 'help' for commands.")
 
     while True:
         user_input = input("Enter an operation (add, subtract, multiply, divide) and two numbers, or 'exit' to quit: ").strip()
+        logging.debug(f"User input received: '{user_input}'")
 
         if user_input.lower() == "exit":
             print("Exiting calculator...")
@@ -79,6 +89,7 @@ def calculator():
             break
 
         if user_input.lower() == "help":
+            logging.debug("User requested help.")
             print("\nAvailable commands:")
             print("  add <num1> <num2>       : Add two numbers.")
             print("  subtract <num1> <num2>  : Subtract the second number from the first.")
@@ -91,14 +102,17 @@ def calculator():
         try:
             # Split user input into components
             operation_name, num1_str, num2_str = user_input.split()
+            logging.debug(f"Parsed operation: '{operation_name}', operands: {num1_str}, {num2_str}")
             num1, num2 = float(num1_str), float(num2_str)
-        except ValueError:
+            logging.debug(f"Converted operands to floats: {num1}, {num2}")
+        except ValueError as ve:
+            logging.error(f"Invalid input format or conversion error: {ve}")
             print("Invalid input. Please follow the format: <operation> <num1> <num2>")
-            logging.error("Invalid input format.")
             continue
 
         # Retrieve the operation class from the registry
         operation_class = operation_registry.get(operation_name.lower())
+        logging.debug(f"Retrieved operation_class: {operation_class}")
 
         if not operation_class:
             print(f"Unknown operation '{operation_name}'. Supported operations: add, subtract, multiply, divide.")
@@ -108,9 +122,10 @@ def calculator():
         try:
             # Instantiate the operation and perform calculation
             operation_instance = operation_class()
+            logging.debug(f"Instantiated {operation_class.__name__} with operands: {num1}, {num2}")
             result = operation_instance.calculate(num1, num2)
             print(f"Result: {result}\n")
             logging.info(f"Performed operation '{operation_name}' with operands {num1} and {num2}: Result {result}")
         except Exception as e:
-            print(f"Error: {e}")
             logging.error(f"Error performing operation '{operation_name}' with operands {num1} and {num2}: {e}")
+            print(f"Error: {e}")
