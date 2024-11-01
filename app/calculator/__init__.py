@@ -1,6 +1,7 @@
 """ app/calculator.py """
 
 import logging
+import warnings
 from app.template_operation import TemplateOperation
 from typing import Callable, Dict, Type
 
@@ -23,6 +24,7 @@ def register_operation(name: str):
     """
     def decorator(cls: Type[TemplateOperation]):
         if name in operation_registry:
+            warnings.warn(f"Operation '{name}' is already registered. Overwriting.")
             logging.warning(f"Operation '{name}' is already registered. Overwriting.")
         operation_registry[name] = cls
         logging.debug(f"Registered operation '{name}' with class '{cls.__name__}'.")
