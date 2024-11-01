@@ -159,4 +159,3 @@ def test_operation_execute_negative(operation_class, a, b, expected_exception):
     operation_instance = operation_class()
     with pytest.raises(expected_exception):
         operation_instance.execute(a, b)
-        
