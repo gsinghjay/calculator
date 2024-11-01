@@ -1,12 +1,15 @@
-import logging  # Standard Python module for logging events and messages.
-# Documentation: https://docs.python.org/3/library/logging.html
+import logging
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def setup_logging():
     """Configure the logging settings for the application."""
     logging.basicConfig(
-        filename='calculator.log',
-        level=logging.DEBUG,
-        format='%(asctime)s - %(levelname)s - %(message)s'
+        filename=os.getenv('LOG_FILENAME', 'calculator.log'),
+        level=getattr(logging, os.getenv('LOG_LEVEL', 'DEBUG')),
+        format=os.getenv('LOG_FORMAT', '%(asctime)s - %(levelname)s - %(message)s')
     )
 
 # This allows other modules to import the setup_logging function directly
