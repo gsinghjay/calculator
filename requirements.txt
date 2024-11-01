@@ -12,6 +12,7 @@ pylint==3.3.1
 pytest==8.3.3
 pytest-cov==5.0.0
 pytest-pylint==0.21.0
+python-dotenv==1.0.0
 tomli==2.0.2
 tomlkit==0.13.2
 typing_extensions==4.12.2

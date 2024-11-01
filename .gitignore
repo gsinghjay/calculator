@@ -11,6 +11,10 @@ __pycache__/
 # Virtual environment folder
 venv/
 
+# Environment variables
+.env
+.env.local
+
 # Distribution / packaging
 .Python
 build/
