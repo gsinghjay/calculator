@@ -23,6 +23,7 @@ class HistoryObserver:
         Parameters:
         - calculation (Calculation): The calculation object that was added.
         """
+        logging.debug("HistoryObserver.update() called with calculation: %s", calculation)
         # Log the notification at INFO level.
         logging.info(f"Observer: New calculation added -> {calculation}")
 
@@ -32,8 +33,10 @@ class CalculatorWithObserver:
     Maintains a list of observers and notifies them of changes.
     """
     def __init__(self):
+        logging.debug("Initializing CalculatorWithObserver.")
         self._history: List = []  # List to store calculation history.
         self._observers: List[HistoryObserver] = []  # List of observers.
+        logging.info("CalculatorWithObserver initialized with empty history and no observers.")
 
     def add_observer(self, observer: HistoryObserver):
         """
@@ -41,6 +44,7 @@ class CalculatorWithObserver:
         Parameters:
         - observer (HistoryObserver): The observer to add.
         """
+        logging.debug("Adding observer: %s", observer)
         self._observers.append(observer)  # Add the observer to the list.
         logging.debug(f"Observer added: {observer}")  # Log the addition.
 
@@ -50,6 +54,7 @@ class CalculatorWithObserver:
         Parameters:
         - calculation (Calculation): The calculation object that was added.
         """
+        logging.debug("Notifying observers about calculation: %s", calculation)
         for observer in self._observers:
             observer.update(calculation)  # Call the update method on the observer.
             logging.debug(f"Notified observer about: {calculation}")  # Log the notification.
@@ -64,12 +69,15 @@ class CalculatorWithObserver:
         Returns:
         - The result of the operation.
         """
-        calculation = operation.calculate(a, b)  # Create a new Calculation object.
+        logging.debug("Starting perform_operation with operands: a=%s, b=%s", a, b)
+        calculation = operation.calculate(a, b)  # Perform the calculation.
+        logging.debug("Calculation result: %s", calculation)
         self._history.append(calculation)  # Add the calculation to the history.
+        logging.debug("Calculation added to history: %s", calculation)
         self.notify_observers(calculation)  # Notify observers of the new calculation.
         logging.debug(f"Performed operation: {calculation}")  # Log the operation.
         return calculation  # Return the calculation result.
     
     # Why use the Observer Pattern?
-# - Decouples the calculator from the observers, allowing for dynamic addition/removal of observers.
-# - Promotes a one-to-many dependency between objects, so when one object changes state, all dependents are notified.
+    # - Decouples the calculator from the observers, allowing for dynamic addition/removal of observers.
+    # - Promotes a one-to-many dependency between objects, so when one object changes state, all dependents are notified.
