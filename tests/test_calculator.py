@@ -1,7 +1,7 @@
 """Test cases for the calculator functionality."""
 import sys
 from io import StringIO
-import pytest # type: ignore
+import pytest  # type: ignore
 from app.calculator import (
     calculator,
     operation_registry,
@@ -130,3 +130,33 @@ def setup_operations():
     register_operation('subtract')(Subtraction)
     register_operation('multiply')(Multiplication)
     register_operation('divide')(Division)
+
+
+# Additional Positive and Negative Tests
+
+@pytest.mark.parametrize("operation_class,a,b,expected", [
+    (Addition, 1, 2, 3),
+    (Addition, -1, -2, -3),
+    (Subtraction, 5, 3, 2),
+    (Subtraction, 0, 0, 0),
+    (Multiplication, 4, 5, 20),
+    (Multiplication, -2, 3, -6),
+    (Division, 10, 2, 5),
+    (Division, -6, 3, -2),
+])
+def test_operation_execute_positive(operation_class, a, b, expected):
+    """Test the execute method of operation classes with valid inputs."""
+    operation_instance = operation_class()
+    assert operation_instance.execute(a, b) == expected
+
+
+@pytest.mark.parametrize("operation_class,a,b,expected_exception", [
+    (Division, 5, 0, ValueError),
+    (Division, -10, 0, ValueError),
+])
+def test_operation_execute_negative(operation_class, a, b, expected_exception):
+    """Test the execute method of operation classes with invalid inputs."""
+    operation_instance = operation_class()
+    with pytest.raises(expected_exception):
+        operation_instance.execute(a, b)
+        
