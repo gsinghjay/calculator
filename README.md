@@ -219,15 +219,22 @@ class Calculation:
    Create a `.env` file in the root directory and specify the following variables:
 
    ```env
-   # Testing Configuration
-   PYTEST_ADDOPTS=--cov=app --cov-report=term-missing --cov-report=html
-   COVERAGE_FILE=.coverage
-   PYTHONPATH=.
+    # Testing Configuration
+    PYTEST_ADDOPTS=--cov=app --cov-report=term-missing --cov-report=html
+    COVERAGE_FILE=.coverage
+    PYTHONPATH=.
 
-   # Logging Configuration (from your existing setup)
-   LOG_FILENAME=calculator4.log
-   LOG_LEVEL=DEBUG
-   LOG_FORMAT=%(asctime)s - %(levelname)s - %(message)s
+    # Logging Configuration (from your existing setup)
+    LOG_FILENAME=calculator.log
+    LOG_LEVEL=DEBUG
+    LOG_FORMAT=%(asctime)s - %(levelname)s - %(name)s - %(message)s
+    LOG_MAX_BYTES=5242880  # 5 MB
+    LOG_BACKUP_COUNT=8
+
+    # History Configuration
+    HISTORY_STORAGE_PATH=./history/
+    MAX_HISTORY_ENTRIES=1000
+    DEFAULT_OUTPUT_FILENAME=calculations.csv
 
    # GitHub Actions specific variables (only needed in CI environment)
    GITHUB_WORKSPACE=${GITHUB_WORKSPACE}
