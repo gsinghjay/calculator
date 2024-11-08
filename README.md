@@ -63,6 +63,8 @@ The calculator application is structured into several modules, each responsible 
 ├── app
 │   ├── calculator
 │   │   └── __init__.py
+│   ├── factory
+│   │   └── __init__.py
 │   ├── logging
 │   │   └── __init__.py
 │   ├── operations
@@ -92,12 +94,12 @@ The calculator application is structured into several modules, each responsible 
 #### 1. **Factory Pattern**
 
 - **Purpose:** To create objects without specifying the exact class of the object to be created.
-- **Implementation:** Located in `app/calculator/__init__.py`, the `OperationFactory` class maps operation names to their corresponding classes.
+- **Implementation:** Located in `app/factory/__init__.py`, the `OperationFactory` class maps operation names to their corresponding classes.
 
-```python:app/calculator/__init__.py
+```python:app/factory/__init__.py
 class OperationFactory:
     @staticmethod
-    def create_operation(operation: str) -> TemplateOperation:
+    def create_operation(operation: Optional[str]) -> Optional[TemplateOperation]:
         operations_map = {
             "add": Addition(),
             "subtract": Subtraction(),
