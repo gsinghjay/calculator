@@ -2,13 +2,8 @@
 
 ![Python Versions](https://img.shields.io/badge/python-3.8%2C%203.9%2C%203.10-blue)
 ![Build Status](https://github.com/gsinghjay/calculator/actions/workflows/tests.yml/badge.svg)
-<!--
-The following badges require repository access. To enable them for a private repository, consider using authenticated Shields.io badges.
-
-![License](https://img.shields.io/github/license/gsinghjay/calculator?token=YOUR_SHIELDS_TOKEN)
 ![Coverage Status](https://img.shields.io/coveralls/github/gsinghjay/calculator?token=YOUR_SHIELDS_TOKEN)
-![GitHub Last Commit](https://img.shields.io/github/last-commit/gsinghjay/calculator?token=YOUR_SHIELDS_TOKEN)
--->
+![License](https://img.shields.io/github/license/gsinghjay/calculator)
 
 ## Table of Contents
 
@@ -20,15 +15,16 @@ The following badges require repository access. To enable them for a private rep
 5. [Usage](#usage)
 6. [Logging and Debugging](#logging-and-debugging)
 7. [Testing](#testing)
-8. [Contributing](#contributing)
-9. [License](#license)
-10. [Acknowledgements](#acknowledgements)
+8. [Continuous Integration](#continuous-integration)
+9. [Contributing](#contributing)
+10. [License](#license)
+11. [Acknowledgements](#acknowledgements)
 
 ---
 
 ## Introduction
 
-Welcome to the **Ultimate Guide to OOP Design Patterns**, where we build a fully functional calculator in Python. This project demonstrates several key Object-Oriented Programming (OOP) design patterns, including:
+Welcome to the **Ultimate Guide to OOP Design Patterns**, where we build a fully functional calculator in Python. This project is a practical demonstration of several key Object-Oriented Programming (OOP) design patterns, including:
 
 - **Command Pattern**
 - **Template Method Pattern**
@@ -37,17 +33,17 @@ Welcome to the **Ultimate Guide to OOP Design Patterns**, where we build a fully
 - **Singleton Pattern**
 - **Strategy Pattern**
 
-Additionally, we've incorporated comprehensive logging and debugging techniques to ensure effective tracking and troubleshooting of the application's behavior.
+By adhering to the SOLID and DRY principles, and employing robust object-oriented design patterns, this calculator ensures scalability, maintainability, and ease of debugging. Comprehensive logging and debugging techniques are integrated to facilitate effective tracking and troubleshooting of the application's behavior.
 
-This guide is tailored for students and developers aiming to deepen their understanding of OOP design patterns through practical implementation.
+This guide is ideal for students and developers aiming to deepen their understanding of OOP design patterns through hands-on implementation.
 
 ---
 
 ## Features
 
-- **Modular Design:** Organized codebase with clear separation of concerns.
+- **Modular Design:** Structured codebase with clear separation of concerns.
 - **Design Patterns:** Implementation of multiple OOP design patterns for scalable and maintainable code.
-- **Observer Support:** Tracks calculation history with observer notifications.
+- **Observer Support:** Monitors calculation history with observer notifications.
 - **Interactive REPL:** User-friendly command-line interface for performing calculations.
 - **Logging:** Detailed logging for monitoring and debugging.
 - **Unit Testing:** Comprehensive test suite ensuring code reliability.
@@ -57,7 +53,7 @@ This guide is tailored for students and developers aiming to deepen their unders
 
 ## Architecture
 
-The calculator application is structured into several modules, each responsible for specific functionality:
+The calculator application is organized into several modules, each responsible for specific functionality:
 
 ```
 ├── app
@@ -65,6 +61,7 @@ The calculator application is structured into several modules, each responsible 
 │   │   └── __init__.py
 │   ├── factory
 │   │   └── __init__.py
+│   ├── history_manager.py
 │   ├── logging
 │   │   └── __init__.py
 │   ├── operations
@@ -76,9 +73,12 @@ The calculator application is structured into several modules, each responsible 
 ├── tests
 │   ├── conftest.py
 │   ├── test_calculator.py
+│   ├── test_factory.py
+│   ├── test_history_manager.py
 │   ├── test_logging.py
 │   ├── test_observer.py
-│   └── test_operations.py
+│   ├── test_operations.py
+│   └── test_template_operation.py
 ├── .coveragerc
 ├── .gitignore
 ├── .github
@@ -196,8 +196,8 @@ class Calculation:
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/yourusername/your-repo.git
-   cd your-repo
+   git clone https://github.com/yourusername/calculator.git
+   cd calculator
    ```
 
 2. **Create a Virtual Environment**
@@ -218,11 +218,26 @@ class Calculation:
 
    Create a `.env` file in the root directory and specify the following variables:
 
-   ```
-   LOG_FILENAME=calculator.log
+   ```env
+   # Testing Configuration
+   PYTEST_ADDOPTS=--cov=app --cov-report=term-missing --cov-report=html
+   COVERAGE_FILE=.coverage
+   PYTHONPATH=.
+
+   # Logging Configuration (from your existing setup)
+   LOG_FILENAME=calculator4.log
    LOG_LEVEL=DEBUG
    LOG_FORMAT=%(asctime)s - %(levelname)s - %(message)s
+
+   # GitHub Actions specific variables (only needed in CI environment)
+   GITHUB_WORKSPACE=${GITHUB_WORKSPACE}
+   GITHUB_ENV=${GITHUB_ENV}
+   GITHUB_PATH=${GITHUB_PATH}
+   RUNNER_DEBUG=1  # Enable debug logging in GitHub Actions
+   ACTIONS_STEP_DEBUG=true  # Enable step debug logging
    ```
+
+   Ensure that the `.env` file is included in your `.gitignore` to prevent sensitive information from being committed to version control.
 
 ---
 
@@ -244,8 +259,12 @@ Once the calculator is running, you can use the following commands:
 - **subtract \<num1> \<num2>**: Subtract the second number from the first.
 - **multiply \<num1> \<num2>**: Multiply two numbers.
 - **divide \<num1> \<num2>**: Divide the first number by the second.
-- **list**: Display calculation history.
+- **history**: Display calculation history.
 - **clear**: Clear the calculation history.
+- **undo**: Undo the last operation.
+- **redo**: Redo the last undone operation.
+- **save \<filename>**: Save history to a CSV file.
+- **load \<filename>**: Load history from a CSV file.
 - **help**: Show available commands.
 - **exit**: Exit the calculator.
 
@@ -253,14 +272,21 @@ Once the calculator is running, you can use the following commands:
 
 ```bash
 Welcome to the OOP Calculator! Type 'help' for available commands.
-Enter an operation and two numbers, or a command: add 10 5
+Enter a command or operation: add 10 5
 Result: 15.0
-Enter an operation and two numbers, or a command: multiply 3 4
+Enter a command or operation: multiply 3 4
 Result: 12.0
-Enter an operation and two numbers, or a command: list
-10.0 addition 5.0 = 15.0
-3.0 multiplication 4.0 = 12.0
-Enter an operation and two numbers, or a command: exit
+Enter a command or operation: history
+  Operation  Operand1  Operand2  Result
+       add       10.0        5.0     15.0
+  multiply        3.0        4.0     12.0
+Enter a command or operation: undo
+Undone: multiply 3.0 4.0 = 12.0
+Enter a command or operation: redo
+Redone: multiply 3.0 4.0 = 12.0
+Enter a command or operation: save calculations.csv
+History saved to calculations.csv.
+Enter a command or operation: exit
 Exiting calculator...
 ```
 
@@ -320,6 +346,8 @@ To generate a coverage report, run:
 pytest --cov=app
 ```
 
+Coverage reports will be available in the terminal and as an HTML report in the `htmlcov` directory.
+
 ### Continuous Integration
 
 GitHub Actions are set up to run tests automatically on every push or pull request to the `main` branch. Configuration can be found in `.github/workflows/tests.yml`.
@@ -340,6 +368,20 @@ jobs:
     runs-on: ubuntu-latest
     ...
 ```
+
+---
+
+## Continuous Integration
+
+The continuous integration (CI) setup uses GitHub Actions to automate testing and ensure code quality. On every push or pull request to the `main` branch, the CI workflow performs the following steps:
+
+1. **Checkout Code:** Retrieves the latest code from the repository.
+2. **Set Up Python:** Installs the specified Python version.
+3. **Install Dependencies:** Installs project dependencies from `requirements.txt`.
+4. **Run Tests:** Executes the test suite using `pytest` with coverage reporting.
+5. **Linting:** Optionally, runs linting tools like `pylint` to enforce coding standards.
+
+This automation ensures that all changes are tested and meet the project's quality standards before being merged.
 
 ---
 
@@ -385,5 +427,8 @@ This project is licensed under the [MIT License](LICENSE).
 - **Refactoring Guru:** [https://refactoring.guru/design-patterns/python](https://refactoring.guru/design-patterns/python)
 - **Pytest Documentation:** [https://docs.pytest.org/](https://docs.pytest.org/)
 - **GitHub Actions Documentation:** [https://docs.github.com/actions](https://docs.github.com/actions)
+- **Pandas Documentation:** [https://pandas.pydata.org/docs/](https://pandas.pydata.org/docs/)
+- **Python Dotenv:** [https://saurabh-kumar.com/python-dotenv/](https://saurabh-kumar.com/python-dotenv/)
+- **Logging in Python:** [https://docs.python.org/3/library/logging.html](https://docs.python.org/3/library/logging.html)
 
 ---
