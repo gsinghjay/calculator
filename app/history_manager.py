@@ -68,7 +68,7 @@ class HistoryManager:
         self.undo_stack.append(("add", entry))
         self.redo_stack.clear()
         logger.info(f"History entry added: {operation} {operand1} {operand2} = {result}")
-        print(f"Operation '{operation}' added successfully.")  # User-facing message
+        print(f"Operation '{operation}' {operand1} and {operand2} successful.")  # User-facing message
 
     def show_history(self) -> None:
         """Display the calculation history."""
@@ -120,7 +120,7 @@ class HistoryManager:
             self.redo_stack.append(("add", removed_entry))
             logger.info(f"Undone: {removed_entry['Operation']} {removed_entry['Operand1']} "
                         f"{removed_entry['Operand2']} = {removed_entry['Result']}")
-            print(f"Operation '{removed_entry['Operation']}' undone successfully.")
+            print(f"Operation '{removed_entry['Operation']}' {removed_entry['Operand1']} and {removed_entry['Operand2']} undone successfully.")
         elif action == "clear":
             logger.info("Undoing clear history operation.")
             self.redo_stack.append(("clear", self.history.copy()))
@@ -155,7 +155,7 @@ class HistoryManager:
             self.history = pd.concat([self.history, data.to_frame().T], ignore_index=True)
             self.undo_stack.append(("add", data.to_frame().T))
             logger.info(f"Redone: {data['Operation']} {data['Operand1']} {data['Operand2']} = {data['Result']}")
-            print(f"Operation '{data['Operation']}' redone successfully.")
+            print(f"Operation '{data['Operation']}' {data['Operand1']} and {data['Operand2']} redone successfully.")
         elif action == "clear":
             logger.info("Redoing clear history operation.")
             self.undo_stack.append(("clear", self.history.copy()))

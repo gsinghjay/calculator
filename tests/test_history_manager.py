@@ -87,7 +87,7 @@ def test_clear_history(history_mgr, capsys):
     assert len(history_mgr.undo_stack) == 2  # One for add and one for clear
     assert history_mgr.redo_stack == []
     captured = capsys.readouterr()
-    assert "Operation 'add' added successfully." in captured.out
+    assert "Operation 'add' 1.0 and 2.0 successful." in captured.out
     assert "History cleared successfully." in captured.out
 
 
@@ -99,7 +99,10 @@ def test_undo_add(history_mgr, capsys):
     assert len(history_mgr.redo_stack) == 1
     assert history_mgr.redo_stack[-1][0] == "add"
     captured = capsys.readouterr()
-    expected_output = "Operation 'add' added successfully.\nOperation 'add' undone successfully."
+    expected_output = (
+        "Operation 'add' 1.0 and 2.0 successful.\n"
+        "Operation 'add' 1.0 and 2.0 undone successfully."
+    )
     assert captured.out.strip() == expected_output
 
 
@@ -129,9 +132,9 @@ def test_redo_add(history_mgr, capsys):
     assert history_mgr.redo_stack == []
     captured = capsys.readouterr()
     expected_output = (
-        "Operation 'add' added successfully.\n"
-        "Operation 'add' undone successfully.\n"
-        "Operation 'add' redone successfully."
+        "Operation 'add' 1.0 and 2.0 successful.\n"
+        "Operation 'add' 1.0 and 2.0 undone successfully.\n"
+        "Operation 'add' 1.0 and 2.0 redone successfully."
     )
     assert captured.out.strip() == expected_output
 
@@ -171,7 +174,7 @@ def test_save_history_failure(history_mgr, capsys):
         history_mgr.save_history("test_history.csv")
     captured = capsys.readouterr()
     expected_output = (
-        "Operation 'add' added successfully.\n"
+        "Operation 'add' 1.0 and 2.0 successful.\n"
         "Failed to save history to test_history.csv: Write error"
     )
     assert captured.out.strip() == expected_output
@@ -218,10 +221,10 @@ def test_undo_add_multiple(history_mgr, capsys):
     assert len(history_mgr.redo_stack) == 2
     captured = capsys.readouterr()
     expected_output = (
-        "Operation 'add' added successfully.\n"
-        "Operation 'add' added successfully.\n"
-        "Operation 'add' undone successfully.\n"
-        "Operation 'add' undone successfully."
+        "Operation 'add' 1.0 and 2.0 successful.\n"
+        "Operation 'add' 4.0 and 5.0 successful.\n"
+        "Operation 'add' 4.0 and 5.0 undone successfully.\n"
+        "Operation 'add' 1.0 and 2.0 undone successfully."
     )
     assert captured.out.strip() == expected_output
 
@@ -255,5 +258,5 @@ def test_undo_add_when_history_empty(history_mgr, capsys):
     # Now, attempt to undo the 'add' operation
     history_mgr.undo()
     captured = capsys.readouterr()
-    expected_output = "Operation 'add' added successfully.\nNothing to undo."
+    expected_output = "Operation 'add' 1.0 and 2.0 successful.\nNothing to undo."
     assert captured.out.strip() == expected_output
