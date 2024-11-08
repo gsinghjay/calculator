@@ -1,5 +1,6 @@
 from typing import List
 import logging
+from app.history_manager import HistoryManager
 
 # ==============================================================================
 # OBSERVER PATTERN FOR TRACKING HISTORY
@@ -11,6 +12,9 @@ import logging
 # Where: In the calculator's history management.
 # When: Whenever a new calculation is performed.
 # How: Observers register themselves with the calculator and are notified upon updates.
+
+# Initialize HistoryManager
+history_manager = HistoryManager()
 
 class HistoryObserver:
     """
@@ -26,6 +30,10 @@ class HistoryObserver:
         logging.debug("HistoryObserver.update() called with calculation: %s", calculation)
         # Log the notification at INFO level.
         logging.info(f"Observer: New calculation added -> {calculation}")
+        # {{ edit_start }}
+        # Removed the following line to fix the error
+        # history_manager.add_entry(calculation['Operation'], calculation['Operand1'], calculation['Operand2'], calculation['Result'])
+        # {{ edit_end }}
 
 class CalculatorWithObserver:
     """
