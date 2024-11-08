@@ -67,10 +67,10 @@ class Addition(TemplateOperation):
     Inherits from TemplateOperation.
     """
     def execute(self, a: float, b: float) -> float:
-        """
-        Returns the sum of two numbers.
-        """
-        return a + b  # Perform addition.
+        """Returns the sum of two numbers."""
+        result = a + b
+        logging.debug(f"Addition executed: {a} + {b} = {result}")
+        return result
 
 class Subtraction(TemplateOperation):
     """
@@ -78,10 +78,10 @@ class Subtraction(TemplateOperation):
     Inherits from TemplateOperation.
     """
     def execute(self, a: float, b: float) -> float:
-        """
-        Returns the difference between two numbers.
-        """
-        return a - b  # Perform subtraction.
+        """Returns the difference between two numbers."""
+        result = a - b
+        logging.debug(f"Subtraction executed: {a} - {b} = {result}")
+        return result
 
 class Multiplication(TemplateOperation):
     """
@@ -89,10 +89,10 @@ class Multiplication(TemplateOperation):
     Inherits from TemplateOperation.
     """
     def execute(self, a: float, b: float) -> float:
-        """
-        Returns the product of two numbers.
-        """
-        return a * b  # Perform multiplication.
+        """Returns the product of two numbers."""
+        result = a * b
+        logging.debug(f"Multiplication executed: {a} * {b} = {result}")
+        return result
 
 class Division(TemplateOperation):
     """
@@ -100,14 +100,13 @@ class Division(TemplateOperation):
     Inherits from TemplateOperation.
     """
     def execute(self, a: float, b: float) -> float:
-        """
-        Returns the quotient of two numbers.
-        Raises a ValueError if attempting to divide by zero.
-        """
+        """Returns the quotient of two numbers."""
         if b == 0:
-            logging.error("Attempted to divide by zero.")  # Log an error message.
-            raise ValueError("Division by zero is not allowed.")  # Raise an exception.
-        return a / b  # Perform division.
+            logging.error("Attempted to divide by zero.")
+            raise ValueError("Division by zero is not allowed.")
+        result = a / b
+        logging.debug(f"Division executed: {a} / {b} = {result}")
+        return result
 
 # Why use the Template Method Pattern here?
 # - It defines the algorithm's skeleton in a method (`calculate`), deferring some steps (`execute`) to subclasses.
