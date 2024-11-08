@@ -5,13 +5,9 @@ import warnings
 from app.template_operation import TemplateOperation
 from typing import Callable, Dict, Type
 
-# Setup logging
-logging.basicConfig(
-    filename='calculator.log',
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-logging.debug("Calculator logging configured.")
+# Initialize a module-specific logger
+logger = logging.getLogger(__name__)
+logger.debug("Calculator module logger initialized.")
 
 # Registry to hold operation name to class mappings
 operation_registry: Dict[str, Type[TemplateOperation]] = {}

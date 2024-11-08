@@ -2,6 +2,9 @@ from typing import List
 import logging
 from app.history_manager import HistoryManager
 
+# Initialize a module-specific logger
+logger = logging.getLogger(__name__)
+
 # ==============================================================================
 # OBSERVER PATTERN FOR TRACKING HISTORY
 # ==============================================================================

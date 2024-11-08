@@ -2,9 +2,12 @@
 
 """Module for managing calculation history using pandas DataFrame."""
 
+import os
 import pandas as pd
 from typing import Optional, Tuple, List, Dict
+import logging
 
+logger = logging.getLogger(__name__)
 
 class HistoryManager:
     """
@@ -12,10 +15,13 @@ class HistoryManager:
     Supports history display, clear, undo, redo, save, and load operations.
     """
 
+    DEFAULT_HISTORY_FILE: str = os.getenv('HISTORY_FILE', 'calculation_history.csv')
+
     def __init__(self):
         self.history = pd.DataFrame(columns=["Operation", "Operand1", "Operand2", "Result"])
         self.undo_stack: List[Tuple[str, Optional[pd.DataFrame]]] = []
         self.redo_stack: List[Tuple[str, Optional[pd.DataFrame]]] = []
+        logger.debug("HistoryManager initialized with empty history.")
 
     def _create_new_entry(
         self, operation: str, operand1: float, operand2: float, result: float
@@ -32,12 +38,14 @@ class HistoryManager:
         Returns:
             Dict[str, float]: A dictionary representing the history entry.
         """
-        return {
+        entry = {
             "Operation": operation,
             "Operand1": operand1,
             "Operand2": operand2,
             "Result": result,
         }
+        logger.debug(f"Created new history entry: {entry}")
+        return entry
 
     def add_entry(
         self, operation: str, operand1: float, operand2: float, result: float
@@ -53,18 +61,24 @@ class HistoryManager:
         entry = pd.DataFrame([self._create_new_entry(operation, operand1, operand2, result)])
         if self.history.empty:
             self.history = entry
+            logger.debug("Added first history entry.")
         else:
             self.history = pd.concat([self.history, entry], ignore_index=True)
+            logger.debug(f"Added history entry: {entry.to_dict(orient='records')}")
         self.undo_stack.append(("add", entry))
         self.redo_stack.clear()
+        logger.info(f"History entry added: {operation} {operand1} {operand2} = {result}")
+        print(f"Operation '{operation}' added successfully.")  # User-facing message
 
     def show_history(self) -> None:
         """Display the calculation history."""
         if self.history.empty:
-            print("No history available.")
+            logger.info("No history available to display.")
+            print("No history available.")  # User message
             return
 
-        print(self.history.to_string(index=False))
+        logger.debug("Displaying calculation history.")
+        print(self.history.to_string(index=False))  # User message
 
     def clear_history(self) -> None:
         """Clear the calculation history."""
@@ -73,11 +87,24 @@ class HistoryManager:
         self.undo_stack.append(("clear", previous_history))
         self.history = pd.DataFrame(columns=self.history.columns)
         self.redo_stack.clear()
-        print("History cleared.")
+        logger.info("History cleared.")
+        print("History cleared successfully.")  # User message
 
     def undo(self) -> None:
-        """Undo the last operation."""
+        """Undo the last operation.
+
+        This method handles undoing the last action performed on the calculation history.
+        It separates logging from user messages to maintain clarity and adherence to SOLID principles.
+
+        Logging:
+            - Records warnings and errors related to undo operations.
+            - Logs informational messages about undo actions.
+
+        User Messages:
+            - Provides feedback to the user about the success or failure of undo actions.
+        """
         if not self.undo_stack:
+            logger.warning("Undo attempted with empty undo stack.")
             print("Nothing to undo.")
             return
 
@@ -85,26 +112,40 @@ class HistoryManager:
 
         if action == "add":
             if self.history.empty:
+                logger.warning("Undo attempted to remove from empty history.")
                 print("Nothing to undo.")
                 return
             removed_entry = self.history.iloc[-1]
             self.history = self.history.iloc[:-1]
             self.redo_stack.append(("add", removed_entry))
-            print(
-                f"Undone: {removed_entry['Operation']} {removed_entry['Operand1']} "
-                f"{removed_entry['Operand2']} = {removed_entry['Result']}"
-            )
+            logger.info(f"Undone: {removed_entry['Operation']} {removed_entry['Operand1']} "
+                        f"{removed_entry['Operand2']} = {removed_entry['Result']}")
+            print(f"Operation '{removed_entry['Operation']}' undone successfully.")
         elif action == "clear":
-            print("Undoing clear history operation.")
+            logger.info("Undoing clear history operation.")
             self.redo_stack.append(("clear", self.history.copy()))
             self.history = data
-            print("History restored.")
+            logger.info("History restored after undoing clear.")
+            print("History restoration after undo successful.")
         else:
+            logger.error(f"Unknown action '{action}' in undo stack.")
             print(f"Unknown action '{action}' in undo stack.")
 
     def redo(self) -> None:
-        """Redo the last undone operation."""
+        """Redo the last undone operation.
+
+        This method handles redoing the last undone action performed on the calculation history.
+        It separates logging from user messages to maintain clarity and adherence to SOLID principles.
+
+        Logging:
+            - Records warnings and errors related to redo operations.
+            - Logs informational messages about redo actions.
+
+        User Messages:
+            - Provides feedback to the user about the success or failure of redo actions.
+        """
         if not self.redo_stack:
+            logger.warning("Redo attempted with empty redo stack.")
             print("Nothing to redo.")
             return
 
@@ -113,42 +154,51 @@ class HistoryManager:
         if action == "add":
             self.history = pd.concat([self.history, data.to_frame().T], ignore_index=True)
             self.undo_stack.append(("add", data.to_frame().T))
-            print(
-                f"Redone: {data['Operation']} {data['Operand1']} "
-                f"{data['Operand2']} = {data['Result']}"
-            )
+            logger.info(f"Redone: {data['Operation']} {data['Operand1']} {data['Operand2']} = {data['Result']}")
+            print(f"Operation '{data['Operation']}' redone successfully.")
         elif action == "clear":
-            print("Redoing clear history operation.")
+            logger.info("Redoing clear history operation.")
             self.undo_stack.append(("clear", self.history.copy()))
             self.history = pd.DataFrame(columns=self.history.columns)
-            print("History cleared.")
+            logger.info("History cleared after redo.")
+            print("History cleared successfully.")
         else:
+            logger.error(f"Unknown action '{action}' in redo stack.")
             print(f"Unknown action '{action}' in redo stack.")
 
-    def save_history(self, filename: str) -> None:
+    def save_history(self, filename: Optional[str] = None) -> None:
         """Save the calculation history to a CSV file.
 
         Args:
-            filename (str): The name of the file to save the history.
+            filename (Optional[str]): The name of the file to save the history.
+                                    Defaults to the environment variable or a default value.
         """
+        filename = filename or self.DEFAULT_HISTORY_FILE
         try:
             self.history.to_csv(filename, index=False)
-            print(f"History saved to {filename}.")
+            logger.info(f"History saved to {filename}.")
+            print(f"History saved to {filename}.")  # User message
         except Exception as e:
-            print(f"Failed to save history to {filename}: {e}")
+            logger.error(f"Failed to save history to {filename}: {e}")
+            print(f"Failed to save history to {filename}: {e}")  # User message
 
-    def load_history(self, filename: str) -> None:
+    def load_history(self, filename: Optional[str] = None) -> None:
         """Load calculation history from a CSV file.
 
         Args:
-            filename (str): The name of the file to load the history from.
+            filename (Optional[str]): The name of the file to load the history from.
+                                      Defaults to the environment variable or a default value.
         """
+        filename = filename or self.DEFAULT_HISTORY_FILE
         try:
             self.history = pd.read_csv(filename)
             self.undo_stack.clear()
             self.redo_stack.clear()
-            print(f"History loaded from {filename}.")
+            logger.info(f"History loaded from {filename}.")
+            print(f"History loaded from {filename}.")  # User message
         except FileNotFoundError:
-            print(f"File {filename} not found.")
+            logger.error(f"File {filename} not found.")
+            print(f"File {filename} not found.")  # User message
         except Exception as e:
-            print(f"Failed to load history from {filename}: {e}")
+            logger.error(f"Failed to load history from {filename}: {e}")
+            print(f"Failed to load history from {filename}: {e}")  # User message
