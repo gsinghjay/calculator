@@ -22,6 +22,7 @@ from typing import List  # Provides support for type hints.
 
 from app.observer import HistoryObserver, CalculatorWithObserver
 from app.template_operation import TemplateOperation, Addition, Subtraction, Multiplication, Division
+from app.factory import OperationFactory
 
 setup_logging()
 logging.debug("Logging has been set up.")
