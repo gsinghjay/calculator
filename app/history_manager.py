@@ -3,7 +3,7 @@
 """Module for managing calculation history using pandas DataFrame."""
 
 import os
-import pandas as pd
+import pandas as pd # type: ignore
 from typing import Optional, Tuple, List, Dict
 import logging
 
