@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 import logging
 
+# Initialize a module-specific logger
+logger = logging.getLogger(__name__)
+
 # ==============================================================================
 # OPERATION CLASSES (COMMAND AND TEMPLATE METHOD PATTERNS)
 # ==============================================================================
