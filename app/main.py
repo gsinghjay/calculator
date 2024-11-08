@@ -23,9 +23,13 @@ from typing import List  # Provides support for type hints.
 from app.observer import HistoryObserver, CalculatorWithObserver
 from app.template_operation import TemplateOperation, Addition, Subtraction, Multiplication, Division
 from app.factory import OperationFactory
+from app.history_manager import HistoryManager
 
 setup_logging()
 logging.debug("Logging has been set up.")
+
+# Initialize HistoryManager
+history_manager = HistoryManager()
 
 # ==============================================================================
 # FACTORY PATTERN FOR CREATING OPERATIONS
@@ -218,91 +222,104 @@ def calculator():
     calc.add_observer(observer)
     logging.debug("HistoryObserver added to CalculatorWithObserver.")
 
-    # Display a welcome message and instructions.
     print("Welcome to the OOP Calculator! Type 'help' for available commands.")
     logging.info("Displayed welcome message to user.")
 
-    # Start the REPL loop.
     while True:
-        # Prompt the user for input.
-        user_input = input("Enter an operation and two numbers, or a command: ")
+        user_input = input("Enter a command or operation: ")
         logging.debug(f"User input: '{user_input}'")
 
-        # Handle the 'help' command.
-        if user_input.lower() == "help":
-            logging.debug("User requested help.")
+        if not user_input.strip():
+            continue  # Skip empty input
+
+        parts = user_input.strip().split()
+
+        command = parts[0].lower()
+
+        if command == "help":
             print("\nAvailable commands:")
             print("  add <num1> <num2>       : Add two numbers.")
             print("  subtract <num1> <num2>  : Subtract the second number from the first.")
             print("  multiply <num1> <num2>  : Multiply two numbers.")
             print("  divide <num1> <num2>    : Divide the first number by the second.")
-            print("  list                    : Show the calculation history.")
-            print("  clear                   : Clear the calculation history.")
+            print("  history                 : Show calculation history.")
+            print("  clear                   : Clear calculation history.")
+            print("  undo                    : Undo the last operation.")
+            print("  redo                    : Redo the last undone operation.")
+            print("  save <filename>         : Save history to a CSV file.")
+            print("  load <filename>         : Load history from a CSV file.")
             print("  exit                    : Exit the calculator.\n")
             logging.debug("Displayed help information to user.")
-            continue  # Return to the start of the loop.
+            continue
 
-        # Handle the 'exit' command.
-        if user_input.lower() == "exit":
+        elif command == "exit":
             print("Exiting calculator...")
-            logging.info("User initiated exit.")
-            break  # Exit the loop and end the program.
+            logging.info("Calculator session terminated by user.")
+            break
 
-        # Handle the 'list' command to display calculation history.
-        if user_input.lower() == "list":
-            logging.debug("User requested calculation history.")
-            if not calc._history:
-                print("No calculations in history.")
-                logging.info("Calculation history is empty.")
-            else:
-                for calc_item in calc._history:
-                    print(calc_item)  # Calls __str__ method of Calculation.
-                logging.info("Displayed calculation history.")
-            continue  # Return to the start of the loop.
+        elif command == "history":
+            history_manager.show_history()
+            continue
 
-        # Handle the 'clear' command to clear the history.
-        if user_input.lower() == "clear":
-            logging.debug("User requested to clear calculation history.")
-            calc._history.clear()  # Clear the history list.
-            logging.info("History cleared.")
-            print("History cleared.")
-            continue  # Return to the start of the loop.
+        elif command == "clear":
+            history_manager.clear_history()
+            continue
 
-        # Attempt to parse and execute the user's command.
-        try:
-            # Set a breakpoint for debugging.
-            # pdb.set_trace()  # Execution will pause here, allowing inspection of variables.
-            logging.debug("Attempting to parse user input.")
-            
-            # Split the user input into components.
-            operation_str, num1_str, num2_str = user_input.split()  # May raise ValueError.
-            logging.debug(f"Parsed input - Operation: '{operation_str}', Num1: {num1_str}, Num2: {num2_str}")
+        elif command == "undo":
+            history_manager.undo()
+            continue
 
-            # Convert the operand strings to float.
-            num1, num2 = float(num1_str), float(num2_str)  # May raise ValueError.
-            logging.debug(f"Converted operands to floats: num1={num1}, num2={num2}")
+        elif command == "redo":
+            history_manager.redo()
+            continue
 
-            # Use the factory to create the appropriate operation object.
-            operation = OperationFactory.create_operation(operation_str)
-            logging.debug(f"Operation instance: {operation}")
+        elif command == "save":
+            if len(parts) != 2:
+                print("Usage: save <filename>")
+                continue
+            filename = parts[1]
+            history_manager.save_history(filename)
+            continue
 
-            if operation:
-                # Perform the operation using the calculator.
-                result = calc.perform_operation(operation, num1, num2)
-                # Display the result to the user.
-                print(f"Result: {result}")
-                logging.info(f"Displayed result to user: {result}")
-            else:
-                # Handle unknown operation names.
-                print(f"Unknown operation '{operation_str}'. Type 'help' for available commands.")
-                logging.warning(f"Unknown operation entered: '{operation_str}'")
+        elif command == "load":
+            if len(parts) != 2:
+                print("Usage: load <filename>")
+                continue
+            filename = parts[1]
+            history_manager.load_history(filename)
+            continue
 
-        except ValueError as e:
-            # Handle errors such as incorrect input format or invalid numbers.
-            logging.error(f"Invalid input or error: {e}")
+        # Handle arithmetic operations
+        if len(parts) != 3:
             print("Invalid input. Please enter a valid operation and two numbers. Type 'help' for instructions.")
-    
-    logging.debug("Calculator REPL terminated.")
+            logging.error("Invalid input format.")
+            continue
+
+        operation_name, num1_str, num2_str = parts
+
+        try:
+            num1, num2 = float(num1_str), float(num2_str)
+            logging.debug(f"Parsed operands: {num1}, {num2}")
+        except ValueError:
+            print("Invalid numbers. Please enter valid numerical values.")
+            logging.error("Invalid number conversion.")
+            continue
+
+        operation = OperationFactory.create_operation(operation_name)
+
+        if not operation:
+            print(f"Unknown operation '{operation_name}'. Type 'help' for available commands.")
+            logging.warning(f"Unknown operation attempted: '{operation_name}'.")
+            continue
+
+        try:
+            result = calc.perform_operation(operation, num1, num2)
+            history_manager.add_entry(operation_name, num1, num2, result)
+            print(f"Result: {result}")
+            logging.info(f"Performed operation '{operation_name}' with operands {num1} and {num2}: Result {result}")
+        except Exception as e:
+            print(f"Error: {e}")
+            logging.error(f"Error performing operation '{operation_name}': {e}")
 
 # Why use a REPL?
 # - Provides an interactive way for users to execute commands and see immediate results.
