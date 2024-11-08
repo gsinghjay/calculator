@@ -2,8 +2,6 @@
 
 ![Python Versions](https://img.shields.io/badge/python-3.8%2C%203.9%2C%203.10-blue)
 ![Build Status](https://github.com/gsinghjay/calculator/actions/workflows/tests.yml/badge.svg)
-![Coverage Status](https://img.shields.io/coveralls/github/gsinghjay/calculator?token=YOUR_SHIELDS_TOKEN)
-![License](https://img.shields.io/github/license/gsinghjay/calculator)
 
 ## Table of Contents
 
@@ -80,6 +78,7 @@ The calculator application is organized into several modules, each responsible f
 │   ├── test_operations.py
 │   └── test_template_operation.py
 ├── .coveragerc
+├── .env
 ├── .gitignore
 ├── .github
 │   └── workflows
