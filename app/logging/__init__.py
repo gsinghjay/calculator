@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from logging.handlers import RotatingFileHandler
 
 # Specify the path to the .env file
-dotenv_path = os.path.join(os.path.dirname(__file__), '..', 'factory', '.env')
+dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
 load_dotenv(dotenv_path)
 
 def setup_logging() -> None:
